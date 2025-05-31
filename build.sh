@@ -1,0 +1,1 @@
+g++ -O3 -std=c++20 -o solve brute_force_solve.cpp
