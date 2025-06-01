@@ -85,6 +85,19 @@ uint8_t yellow_tiles_53[] = {1,2,4,1,
 };
 uint64_t sp_solution_53 = 0b1011001000101000000100111010110101110;
 
+uint8_t yellow_tiles_54[] = {4,4,0,2,
+    1,2,3,3,
+    2,2,1,
+    2,3,1,0,
+    5,3,0,
+    1,1,2
+};
+uint64_t sp_solution_54 = 0b1000101100000110100100100100110010100;
+
+uint8_t yellow_tiles_51[] = {2,3,3,4,4,5,2,4,4,1,3,1,4,2,4,5,4,3,4,2,5};
+uint8_t yellow_tiles_50[] = {2,3,3,1,2,3,5,3,3,2,2,0,1,3,6,4,5,1,2,5,4};
+uint8_t yellow_tiles_49[] = {3,3,1,1,1,1,3,4,3,3,2,1,3,3,3,4,1,2,2,2,5};
+
 // Each board state represented with a binary number. The lower 37 bits indicate
 // which tile is yellow/black indexed by order from top to bottom, left to right
 // (see board_indexing.png). Thus we can extract which tiles we need to work with
@@ -116,6 +129,8 @@ void test_system() {
     static_assert(ARRAY_LEN(yellow_tiles_53) == ARRAY_LEN(filter_depth_3));
 
     std::cout << test_board(sp_solution_53, yellow_tiles_53, filter_depth_3, ARRAY_LEN(filter_depth_3)) << '\n';
+    std::cout << test_board(sp_solution_54, yellow_tiles_54, filter_depth_3, ARRAY_LEN(filter_depth_3)) << '\n';
+
 }
 
 
@@ -123,7 +138,7 @@ int main() {
 
     test_system();
 
-    uint8_t* tiles = yellow_tiles_53;
+    uint8_t* tiles = yellow_tiles_49; //yellow_tiles_test_depth_3; //yellow_tiles_53;
 
     //Calculate the minimum valid board to cut down the search space
     //This is a board which has the first n bits set where n is the
