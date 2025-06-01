@@ -133,8 +133,42 @@ void test_system() {
 
 }
 
+/*************************************************************/
+//https://web.archive.org/web/20130731200134/http://hackersdelight.org/hdcodetxt/snoob.c.txt
 
-int main() {
+int ntz(uint64_t x) {         // Number of trailing zeros.
+   int n;
+
+   if (x == 0) return(64);
+   n = 1;
+//    // We don't need to perform these extra checks at the depth 3 board
+//    // is fixed to 37 bits long. Which means we never have to deal with
+//    // larger possible trailing zeroes.
+//    if ((x & 0x00FFFFFFFFFFFFFF) == 0) {n = n +56; x = x >>56;}
+//    if ((x & 0x0000FFFFFFFFFFFF) == 0) {n = n +48; x = x >>48;}
+//    if ((x & 0x000000FFFFFFFFFF) == 0) {n = n +40; x = x >>40;}
+//    if ((x & 0x00000000FFFFFFFF) == 0) {n = n +32; x = x >>32;}
+   if ((x & 0x0000000000FFFFFF) == 0) {n = n +24; x = x >>24;}
+   if ((x & 0x000000000000FFFF) == 0) {n = n +16; x = x >>16;}
+   if ((x & 0x00000000000000FF) == 0) {n = n + 8; x = x >> 8;}
+   if ((x & 0x000000000000000F) == 0) {n = n + 4; x = x >> 4;}
+   if ((x & 0x0000000000000003) == 0) {n = n + 2; x = x >> 2;}
+   return n - (x & 1);
+}
+
+uint64_t next_set_of_n_elements(uint64_t x) {
+    uint64_t smallest, ripple, new_smallest, ones;
+
+                                 // x = xxx0 1111 0000
+    smallest = x & -x;           //     0000 0001 0000
+    ripple = x + smallest;       //     xxx1 0000 0000
+    ones = x ^ ripple;           //     0001 1111 0000
+    ones = ones >> (2 + ntz(x)); //     0000 0000 0111
+    return ripple | ones;        //     xxx1 0000 0111
+}
+/*************************************************************/
+
+int main(void) {
 
     test_system();
 
@@ -168,11 +202,16 @@ int main() {
     //- Only need to check the yellow tiles, drops our exec time to
     //  aprox 10.5 min.
     //- Add branch prediction hint: drops the exec time to ~9.75 min.
+    //- Turn on native architecture options on compiler: drops to ~4.5min
+    //- Reduce search space by on making sure we only generate numbers with
+    //  the exact required number of bit. Drops to ~4min.
+    //- Improve number generation algorithm to remove division. Drops to ~80s.
 
     //TODO: Parallelise the search to speed things up?
 
     //Iterate over every possible board, outputing valid solutions
-    for (uint64_t board = lower_limit; board < upper_limit; board++) {
+    for (uint64_t board = lower_limit; board < upper_limit; board = next_set_of_n_elements(board)) {
+    // for (uint64_t board = lower_limit; board < upper_limit; board++) {
         if (test_board(board, tiles, filter_depth_3, ARRAY_LEN(filter_depth_3))) {
             std::cout << std::format("{:037b}", board) << '\n';
         }
