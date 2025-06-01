@@ -70,7 +70,8 @@ uint8_t yellow_tiles_test_depth_3[] = {5,2,2,2,
     4,2,2,
     2,2,4,3,
     3,3,3,
-    2,4,3};
+    2,4,3
+};
 uint64_t test_board_depth_3_valid   = 0b1000001111111010001110110010000111011;
 uint64_t test_board_depth_3_invalid = 0b1000001111111010001110110010000111010;
 
@@ -80,8 +81,8 @@ uint8_t yellow_tiles_53[] = {1,2,4,1,
     3,1,2,
     3,2,0,2,
     4,4,2,
-    1,4,4};
-
+    1,4,4
+};
 uint64_t sp_solution_53 = 0b1011001000101000000100111010110101110;
 
 // Each board state represented with a binary number. The lower 37 bits indicate
