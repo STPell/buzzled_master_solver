@@ -142,9 +142,9 @@ if __name__ == "__main__":
 
     #brute_force_search()
     #print(TILES)
-    solutions = [54885035123, 59096134777, 62399147603, 70854861883]
+    solutions = ["0110011000111011001110010110001110011", "0110111000010011001110111010001111001", "0111010000111010001110110111001010011", "1000001111111010001110110010000111011"]
     for s in solutions:
-        solution = ['Y' if c == '1' else 'B' for c in "{:37b}".format(s)]
+        solution = ['Y' if c == '1' else 'B' for c in s]
         solution.reverse()
         plot_solution(np.array(solution))
 
