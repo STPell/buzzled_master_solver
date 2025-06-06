@@ -1,3 +1,7 @@
 .venv/
 .vscode/
 *_solve
+*_solve_old
+auto_solve_master
+*.s
+__pycache__/

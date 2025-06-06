@@ -63,36 +63,18 @@ bool test_board(uint64_t board, uint8_t* tiles, uint64_t* filters, size_t len) {
 
 /*************************************************************/
 //https://web.archive.org/web/20130731200134/http://hackersdelight.org/hdcodetxt/snoob.c.txt
-
-int ntz(uint64_t x) {         // Number of trailing zeros.
-   int n;
-
-   if (x == 0) return(64);
-   n = 1;
-//    // We don't need to perform these extra checks at the depth 3 board
-//    // is fixed to 37 bits long. Which means we never have to deal with
-//    // larger possible trailing zeroes.
-//    if ((x & 0x00FFFFFFFFFFFFFF) == 0) {n = n +56; x = x >>56;}
-//    if ((x & 0x0000FFFFFFFFFFFF) == 0) {n = n +48; x = x >>48;}
-//    if ((x & 0x000000FFFFFFFFFF) == 0) {n = n +40; x = x >>40;}
-//    if ((x & 0x00000000FFFFFFFF) == 0) {n = n +32; x = x >>32;}
-   if ((x & 0x0000000000FFFFFF) == 0) {n = n +24; x = x >>24;}
-   if ((x & 0x000000000000FFFF) == 0) {n = n +16; x = x >>16;}
-   if ((x & 0x00000000000000FF) == 0) {n = n + 8; x = x >> 8;}
-   if ((x & 0x000000000000000F) == 0) {n = n + 4; x = x >> 4;}
-   if ((x & 0x0000000000000003) == 0) {n = n + 2; x = x >> 2;}
-   return n - (x & 1);
-}
+//Modified to use countr_zero instrinsic included in C++ 20, which
+//compiles to a single x86 instruction
 
 uint64_t next_set_of_n_elements(uint64_t x) {
     uint64_t smallest, ripple, new_smallest, ones;
 
-                                 // x = xxx0 1111 0000
-    smallest = x & -x;           //     0000 0001 0000
-    ripple = x + smallest;       //     xxx1 0000 0000
-    ones = x ^ ripple;           //     0001 1111 0000
-    ones = ones >> (2 + ntz(x)); //     0000 0000 0111
-    return ripple | ones;        //     xxx1 0000 0111
+                                              // x = xxx0 1111 0000
+    smallest = x & -x;                        //     0000 0001 0000
+    ripple = x + smallest;                    //     xxx1 0000 0000
+    ones = x ^ ripple;                        //     0001 1111 0000
+    ones = ones >> (2 + std::countr_zero(x)); //     0000 0000 0111
+    return ripple | ones;                     //     xxx1 0000 0111
 }
 /*************************************************************/
 
@@ -230,7 +212,9 @@ void brute_force_solve(uint8_t* tiles) {
     //- Turn on native architecture options on compiler: drops to ~4.5min
     //- Reduce search space by on making sure we only generate numbers with
     //  the exact required number of bit. Drops to ~4min.
-    //- Improve number generation algorithm to remove division. Drops to ~80s.
+    //- Improve number generation algorithm to remove division. Drops to ~90s.
+    //- Change one step of number generation algorithm to use a C++ intrinsic
+    //  which compiles down to a single x86 instruction TZCNT. Drops to ~59s.
 
     //TODO: Parallelise the search to speed things up?
 
