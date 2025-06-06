@@ -5,3 +5,4 @@
 auto_solve_master
 *.s
 __pycache__/
+bf_solve*
