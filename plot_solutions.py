@@ -7,21 +7,35 @@ PLOT_MAP = [7, 14, 21, 28, 4, 11, 18, 25, 32, 2, 8, 15, 22, 29, 35, 1, 5, 12, 19
 # Convert from numbering to python indexing
 PLOT_MAP = [i - 1 for i in PLOT_MAP]
 
+YELLOW_HEX = "FFD700"
+BLACK_HEX = "333333"
+YELLOW_ARRAY = [1.0, 217/255, 0.0]
+BLACK_ARRAY= [51/255, 51/255, 51/255]
+STROKE_ARRAY = [0xAA/255,0xAA/255,0xAA/255]
+
 YELLOW = 'Y'
 BLACK = 'B'
 
-def plot_solution(solution):
+def plot_solution(solution, solution_id):
     centers, _ = hx.create_hex_grid(n=50, do_plot=False, crop_circ=3, rotate_deg=90)
     centers_x = centers[:, 0]
     centers_y = centers[:, 1]
 
     colours = solution[PLOT_MAP]
-    colours = ['y' if i == YELLOW else 'k' for i in colours]
+    #colours = ['y' if i == YELLOW else 'k' for i in colours]
+    colours = [YELLOW_ARRAY if i == YELLOW else BLACK_ARRAY for i in colours]
+    edges = [STROKE_ARRAY for i in colours]
+
     hx.plot_single_lattice_custom_colors(centers_x, centers_y, face_color=colours,
-                                         edge_color=colours,
+                                         edge_color=edges,
                                          min_diam=0.9,
                                          plotting_gap=0.05,
                                          rotate_deg=90)
+    ax = plt.gca()
+    ax.set_xlim([-3.1, 3.1])
+    ax.set_ylim([-3.5, 3.5])
+    ax.axis('off')
+    ax.set_title(f"{solution_id}")
 
 
 def test_plot():
@@ -29,6 +43,37 @@ def test_plot():
     plot_solution(solution1)
     plt.show()
 
+
+def plot_solutions(solutions):
+    i = 0
+    if len(solutions) > 10:
+        solutions_t = solutions
+
+        while len(solutions_t) > 10:
+            i += 1
+            solutions = solutions_t[:10]
+            solutions_t = solutions_t[10:]
+
+            for s in solutions:
+                solution = [YELLOW if c == '1' else BLACK for c in s]
+                solution.reverse()
+                plot_solution(np.array(solution), i)
+            plt.show()
+
+        for s in solutions_t:
+            i += 1
+            solution = [YELLOW if c == '1' else BLACK for c in s]
+            solution.reverse()
+            plot_solution(np.array(solution), i)
+        plt.show()
+
+    else:
+        for s in solutions:
+            i += 1
+            solution = [YELLOW if c == '1' else BLACK for c in s]
+            solution.reverse()
+            plot_solution(np.array(solution), i)
+        plt.show()
 
 if __name__ == "__main__":
     solutions_52 = ["0110011000111011001110010110001110011", "0110111000010011001110111010001111001", "0111010000111010001110110111001010011", "1000001111111010001110110010000111011"]
@@ -47,29 +92,5 @@ if __name__ == "__main__":
 
     print(len(solutions))
 
-    if len(solutions) > 10:
-        solutions_t = solutions
-
-        while len(solutions_t) > 10:
-            solutions = solutions_t[:10]
-            solutions_t = solutions_t[10:]
-
-            for s in solutions:
-                solution = [YELLOW if c == '1' else BLACK for c in s]
-                solution.reverse()
-                plot_solution(np.array(solution))
-            plt.show()
-
-        for s in solutions_t:
-            solution = [YELLOW if c == '1' else BLACK for c in s]
-            solution.reverse()
-            plot_solution(np.array(solution))
-        plt.show()
-
-    else:
-        for s in solutions:
-            solution = [YELLOW if c == '1' else BLACK for c in s]
-            solution.reverse()
-            plot_solution(np.array(solution))
-        plt.show()
+    plot_solutions(solutions)
 

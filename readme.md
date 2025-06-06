@@ -39,3 +39,11 @@ indicate the direction in which the bitmasks are recorded.
 - Automate plotting solutions as they're generated
 - Generalise to different sizes of puzzles
 - Figure out a way of analytically predicting how many solutions there are
+
+
+## auto_solve
+
+- Install firefox, preferably not via snap. See [here](https://askubuntu.com/questions/1399383/how-to-install-firefox-as-a-traditional-deb-package-without-snap-in-ubuntu-22).
+- Setup XDG variabls as per [this stack overflow post](https://askubuntu.com/questions/456689/error-xdg-runtime-dir-not-set-in-the-environment-when-attempting-to-run-naut).
+- Install selenium
+- Run autosolver
