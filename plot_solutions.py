@@ -7,6 +7,13 @@ PLOT_MAP = [7, 14, 21, 28, 4, 11, 18, 25, 32, 2, 8, 15, 22, 29, 35, 1, 5, 12, 19
 # Convert from numbering to python indexing
 PLOT_MAP = [i - 1 for i in PLOT_MAP]
 
+SUM_POSITIONS = [(-0.1, 3.5), (0.83, 3.0), (1.75, 2.5), (2.58, 2.0),
+                 (3.1, 1.0), (3.1, 0.0), (3.1, -1.0), (3.1, -2.0),
+                 (2.3, -2.4), (1.4, -2.9), (0.6, -3.4),
+                 (-0.7, -3.4), (-1.5, -2.9), (-2.4, -2.4), (-3.2, -2.0),
+                 (-3.2, -1.0), (-3.2, 0.0), (-3.2, 1.0),
+                 (-2.7, 2.0), (-1.85, 2.5), (-0.9, 3.0)]
+
 YELLOW_HEX = "FFD700"
 BLACK_HEX = "333333"
 YELLOW_ARRAY = [1.0, 217/255, 0.0]
@@ -16,7 +23,7 @@ STROKE_ARRAY = [0xAA/255,0xAA/255,0xAA/255]
 YELLOW = 'Y'
 BLACK = 'B'
 
-def plot_solution(solution, solution_id):
+def plot_solution(solution, solution_id, sums=None):
     centers, _ = hx.create_hex_grid(n=50, do_plot=False, crop_circ=3, rotate_deg=90)
     centers_x = centers[:, 0]
     centers_y = centers[:, 1]
@@ -31,11 +38,21 @@ def plot_solution(solution, solution_id):
                                          min_diam=0.9,
                                          plotting_gap=0.05,
                                          rotate_deg=90)
+
     ax = plt.gca()
-    ax.set_xlim([-3.1, 3.1])
-    ax.set_ylim([-3.5, 3.5])
     ax.axis('off')
     ax.set_title(f"{solution_id}")
+
+    if sums is None:
+        ax.set_xlim([-3.1, 3.1])
+        ax.set_ylim([-3.5, 3.5])
+    else:
+        ax.set_xlim([-3.3, 3.3])
+        ax.set_ylim([-3.8, 3.8])
+        for i in range(len(sums)):
+            plt.text(SUM_POSITIONS[i][0], SUM_POSITIONS[i][1], sums[i])
+
+
 
 
 def test_plot():
@@ -44,7 +61,7 @@ def test_plot():
     plt.show()
 
 
-def plot_solutions(solutions):
+def plot_solutions(solutions, sums=None):
     i = 0
     if len(solutions) > 10:
         solutions_t = solutions
@@ -57,14 +74,14 @@ def plot_solutions(solutions):
                 i += 1
                 solution = [YELLOW if c == '1' else BLACK for c in s]
                 solution.reverse()
-                plot_solution(np.array(solution), i)
+                plot_solution(np.array(solution), i, sums=sums)
             plt.show()
 
         for s in solutions_t:
             i += 1
             solution = [YELLOW if c == '1' else BLACK for c in s]
             solution.reverse()
-            plot_solution(np.array(solution), i)
+            plot_solution(np.array(solution), i, sums=sums)
         plt.show()
 
     else:
@@ -72,7 +89,7 @@ def plot_solutions(solutions):
             i += 1
             solution = [YELLOW if c == '1' else BLACK for c in s]
             solution.reverse()
-            plot_solution(np.array(solution), i)
+            plot_solution(np.array(solution), i, sums=sums)
         plt.show()
 
 if __name__ == "__main__":
@@ -88,9 +105,9 @@ if __name__ == "__main__":
 
     solutions = solutions_50
 
-    #solutions = ["0001000001101001011001001001001101011"]
+    solutions = ["1000001111111010001110110010000111011"]
 
     print(len(solutions))
 
-    plot_solutions(solutions)
+    plot_solutions(solutions, sums=[5,2,2,2,2,3,1,6,4,2,2,2,2,4,3,3,3,3,2,4,3])
 

@@ -74,7 +74,7 @@ def process_master(page):
     with open(RESULTS_FILE_NAME, "a+") as res_file:
         res_file.write(f"{current_date};{sum_argument};{";".join(results)}\n")
 
-    return results
+    return results, sums_prog_order
 
 
 def main():
@@ -93,11 +93,11 @@ def main():
         print("Failed to find the main puzzle. Giving up")
         return
 
-    solutions = process_master(driver)
+    master_solutions, master_sums = process_master(driver)
 
     driver.close()
 
-    plotter.plot_solutions(solutions)
+    plotter.plot_solutions(master_solutions, master_sums)
 
 
 
