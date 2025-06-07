@@ -72,7 +72,7 @@ def process_master(page):
 
     current_date = time.strftime("%Y%m%d")
     with open(RESULTS_FILE_NAME, "a+") as res_file:
-        res_file.write(f"{current_date};{sum_argument};{";".join(results)}")
+        res_file.write(f"{current_date};{sum_argument};{";".join(results)}\n")
 
     return results
 
