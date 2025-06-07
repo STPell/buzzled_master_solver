@@ -4,6 +4,8 @@
 #include <iostream>
 #include <format>
 #include <string>
+#include <thread>
+#include <vector>
 
 static_assert(std::popcount(0xFULL) == 4);
 
@@ -12,6 +14,8 @@ static_assert(std::popcount(0xFULL) == 4);
 
 #define likely(x)    __builtin_expect (!!(x), 1)
 
+
+#define NUM_THREADS 4
 
 uint64_t filter_depth_3[] = {
     BIT64(0)|BIT64(4)|BIT64(11)|BIT64(18)|BIT64(25)|BIT64(32)|BIT64(36),
@@ -179,6 +183,33 @@ bool deterministic_solve(uint8_t* tiles) {
     }
 }
 
+typedef struct {
+    uint8_t* tiles;
+    uint64_t start;
+    uint64_t end;
+    std::vector<uint64_t>* results;
+    std::mutex* results_mutex;
+} search_task_t;
+
+void bf_solve_thread(void *arg) {
+    search_task_t* task = (search_task_t*) arg;
+
+    uint8_t* tiles = task->tiles;
+    uint64_t lower_limit = task->start;
+    uint64_t upper_limit = task->end;
+
+    //Iterate over every possible board, outputing valid solutions
+    for (uint64_t board = lower_limit; board < upper_limit; board = next_set_of_n_elements(board)) {
+    // for (uint64_t board = lower_limit; board < upper_limit; board++) {
+        if (test_board(board, tiles, filter_depth_3, ARRAY_LEN(filter_depth_3))) {
+            //std::cout << std::format("{:037b}", board) << '\n';
+            task->results_mutex->lock();
+            task->results->push_back(board);
+            task->results_mutex->unlock();
+        }
+    }
+}
+
 
 void brute_force_solve(uint8_t* tiles) {
     //Calculate the minimum valid board to cut down the search space
@@ -202,6 +233,8 @@ void brute_force_solve(uint8_t* tiles) {
     uint8_t black_tile_cnt = 37 - yellow_tile_cnt;
     uint64_t upper_limit = lower_limit << black_tile_cnt;
 
+    //OPTMISATION RECORDS.
+    //Recorded based on the Buzzled #52 (yellow_tiles_test_depth_3)
     //- Full space search took ~17.5 minutes against the test board
     //- Cut down search space of the test board is about 99.999% the
     //  size of the original space but it was worth attempting. Took
@@ -211,19 +244,66 @@ void brute_force_solve(uint8_t* tiles) {
     //- Add branch prediction hint: drops the exec time to ~9.75 min.
     //- Turn on native architecture options on compiler: drops to ~4.5min
     //- Reduce search space by on making sure we only generate numbers with
-    //  the exact required number of bit. Drops to ~4min.
+    //  the exact required number of bits. Drops to ~4min.
     //- Improve number generation algorithm to remove division. Drops to ~90s.
     //- Change one step of number generation algorithm to use a C++ intrinsic
     //  which compiles down to a single x86 instruction TZCNT. Drops to ~59s.
+    //- Parallelise but drop back to not caring about filtering for the right
+    //  number of zeros gets us down to ~45s.
+    //- Parallelise but begin caring about the right number of yellow tiles
+    //  gets the exec time down to ~13s with 4 cores on my home machine.
 
-    //TODO: Parallelise the search to speed things up?
+    // Parallelise the search cause we gotta go fast
+    search_task_t tasks[NUM_THREADS] = {0};
+    std::vector<uint64_t> results;
+    std::mutex results_mutex;
+    std::thread threads[NUM_THREADS];
 
-    //Iterate over every possible board, outputing valid solutions
-    for (uint64_t board = lower_limit; board < upper_limit; board = next_set_of_n_elements(board)) {
-    // for (uint64_t board = lower_limit; board < upper_limit; board++) {
-        if (test_board(board, tiles, filter_depth_3, ARRAY_LEN(filter_depth_3))) {
-            std::cout << std::format("{:037b}", board) << '\n';
+    // For now, just split the space into even chunks. Not all threads may do
+    // the same amount of computation as the search space isn't necessarily
+    // uniformly dense, but other options like pulling from a shared pool of
+    // boards will probably tank each single threads performance.
+    uint64_t interval = (upper_limit - lower_limit) / NUM_THREADS;
+    for (int i = 0; i < NUM_THREADS; i++) {
+        uint64_t start = lower_limit + (i * interval);
+        int start_tile_cnt = std::popcount(start);
+        if (start_tile_cnt < yellow_tile_cnt) {
+            // Too few yellow tiles, incrementally add more to the end of the
+            // board until we have the right number
+            int j = 0;
+            while (std::popcount(start) < yellow_tile_cnt) {
+                start |= (1 << j);
+                j++;
+            }
+        } else if (start_tile_cnt > yellow_tile_cnt) {
+            // Too many yellow tiles, incrementally remove them from the end of
+            // the board until we have the right number.
+            int j = 0;
+            while (std::popcount(start) > yellow_tile_cnt) {
+                start &= ~(1 << j);
+                j++;
+            }
         }
+
+        tasks[i].start = start;
+        tasks[i].end = tasks[i].start + interval + 1;
+        tasks[i].tiles = tiles;
+        tasks[i].results = &results;
+        tasks[i].results_mutex = &results_mutex;
+
+        // std::cout << std::format("{:d}, start={:d}, end={:d}\n", i, tasks[i].start, tasks[i].end);
+
+        threads[i] = std::thread(bf_solve_thread, (void*) &tasks[i]);
+    }
+
+    // Wait for all our child threads to finish their search
+    for (int i = 0; i < NUM_THREADS; i++) {
+        threads[i].join();
+    }
+
+    // Print all our hard earned results.
+    for (uint64_t board: results) {
+        std::cout << std::format("{:037b}", board) << '\n';
     }
 }
 
