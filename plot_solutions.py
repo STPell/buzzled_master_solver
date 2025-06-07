@@ -50,11 +50,11 @@ def plot_solutions(solutions):
         solutions_t = solutions
 
         while len(solutions_t) > 10:
-            i += 1
             solutions = solutions_t[:10]
             solutions_t = solutions_t[10:]
 
             for s in solutions:
+                i += 1
                 solution = [YELLOW if c == '1' else BLACK for c in s]
                 solution.reverse()
                 plot_solution(np.array(solution), i)
