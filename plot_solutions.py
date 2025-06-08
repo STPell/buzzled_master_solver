@@ -23,13 +23,13 @@ STROKE_ARRAY = [0xAA/255,0xAA/255,0xAA/255]
 YELLOW = 'Y'
 BLACK = 'B'
 
-def plot_solution(solution, solution_id, sums=None):
+def plot_solution(solution, solution_id, sums=None, weights=None):
     centers, _ = hx.create_hex_grid(n=50, do_plot=False, crop_circ=3, rotate_deg=90)
     centers_x = centers[:, 0]
     centers_y = centers[:, 1]
 
     colours = solution[PLOT_MAP]
-    #colours = ['y' if i == YELLOW else 'k' for i in colours]
+    weight_colours = ['k' if i == YELLOW else 'w' for i in colours]
     colours = [YELLOW_ARRAY if i == YELLOW else BLACK_ARRAY for i in colours]
     edges = [STROKE_ARRAY for i in colours]
 
@@ -42,6 +42,12 @@ def plot_solution(solution, solution_id, sums=None):
     ax = plt.gca()
     ax.axis('off')
     ax.set_title(f"{solution_id}")
+
+    if weights is not None:
+        weights = np.array(weights)[PLOT_MAP]
+
+        for i in range(len(weights)):
+            plt.text(centers_x[i], centers_y[i], weights[i], ha="center", va="center", c=weight_colours[i])
 
     if sums is None:
         ax.set_xlim([-3.1, 3.1])
@@ -61,7 +67,7 @@ def test_plot():
     plt.show()
 
 
-def plot_solutions(solutions, sums=None):
+def plot_solutions(solutions, sums=None, weights=None):
     i = 0
     if len(solutions) > 10:
         solutions_t = solutions
@@ -89,7 +95,7 @@ def plot_solutions(solutions, sums=None):
             i += 1
             solution = [YELLOW if c == '1' else BLACK for c in s]
             solution.reverse()
-            plot_solution(np.array(solution), i, sums=sums)
+            plot_solution(np.array(solution), i, sums=sums, weights=weights)
         plt.show()
 
 if __name__ == "__main__":
@@ -109,5 +115,5 @@ if __name__ == "__main__":
 
     print(len(solutions))
 
-    plot_solutions(solutions, sums=[5,2,2,2,2,3,1,6,4,2,2,2,2,4,3,3,3,3,2,4,3])
+    plot_solutions(solutions, sums=sums)#, weights=weights)
 

@@ -97,7 +97,7 @@ def main():
 
     driver.close()
 
-    plotter.plot_solutions(master_solutions, master_sums)
+    plotter.plot_solutions(master_solutions, sums=master_sums)
 
 
 
