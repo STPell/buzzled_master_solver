@@ -2,3 +2,4 @@ numpy
 hexalattice
 matplotlib
 selenium
+z3-solver
