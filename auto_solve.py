@@ -21,6 +21,7 @@ MASTER_PUZZLE_SUM_CNT = 21
 TILES_PER_ROW_DEPTH_3 = [4,5,6,7,6,5,4,4,5,6,7,6,5,4,4,5,6,7,6,5,4] #In SVG Order
 
 MINI_SVG_TEXT_ORDER = [13,14,0,1,2,3,4,5,6,7,8,9,10,11,12]
+EXPERT_SVG_TEXT_ORDER = [23,24,25,26,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]
 
 
 def select_puzzle(page, button_text):
@@ -182,6 +183,52 @@ def process_mini(page):
         plotter.plot_solutions([s], sums=sums_prog_order, weights=weights)
 
 
+def process_expert(page):
+    if not select_puzzle(page, EXPERT_BUZZLE_BUTTON_TEXT):
+        # We couldn't find the puzzle we wanted
+        return
+
+    svg = page.find_element(By.ID, "puzzle-svg")
+    encoded = svg.text.split('\n')
+    sums = encoded[1:]
+    weights_str = encoded[0].split(' ')
+
+    # Change weights from SVG order into our order
+    weights = [0 for i in range(solver.DEPTH_4_TILE_CNT)]
+    for i in range(solver.DEPTH_4_TILE_CNT):
+        weights[plotter.PLOT_MAP_DEPTH_4[i]] = int(weights_str[i])
+
+    if len(sums) != len(solver.DEPTH_4_FILTERS):
+        # We don't have the right number of sums, give up
+        return
+
+    sums_svg_order = [int(s) for s in sums]
+    sums_prog_order = [0 for s in range(len(sums))]
+
+    # Our program expects the sums to be the number of yellows in the row.
+    # => We need to convert the black labels to yellow for later processing
+    labels = svg.find_elements(By.CLASS_NAME, "label")
+
+    if len(labels) != len(EXPERT_SVG_TEXT_ORDER):
+        # We have too many or too few labels than sums, which is not right, give up.
+        return
+
+    for i in range(len(sums)):
+        dest_idx = EXPERT_SVG_TEXT_ORDER[i]
+        is_black = "black" in labels[i].find_element(By.TAG_NAME, "path").get_attribute("class")
+        if is_black:
+            #Need to sum the total possible elements in a row and subtract required sum
+            #to get the sum of yellow tiles needed.
+            sums_prog_order[dest_idx] = sum_tiles_in_row(weights, solver.DEPTH_4_FILTERS[dest_idx]) - sums_svg_order[i]
+        else:
+            # Can just the use sum provided to us
+            sums_prog_order[dest_idx] = sums_svg_order[i]
+
+    s = solver.solve_expert(weights, sums_prog_order)
+    if s is not None:
+        plotter.plot_solutions([s], sums=sums_prog_order, weights=weights)
+
+
 def main():
     driver = webdriver.Firefox()
     driver.get(URL)
@@ -198,12 +245,15 @@ def main():
         print("Failed to find the main puzzle. Giving up")
         return
 
+    process_classic(driver)
+    process_mini(driver)
+    process_expert(driver)
+
     master_solutions, master_sums = process_master(driver)
 
     driver.close()
 
     plotter.plot_solutions(master_solutions, sums=master_sums)
-
 
 
 if __name__ == "__main__":

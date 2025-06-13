@@ -110,6 +110,42 @@ def plot_solution_depth2(solution, solution_id, sums=None, weights=None):
             plt.text(SUM_POSITIONS_DEPTH_2[i][0], SUM_POSITIONS_DEPTH_2[i][1], sums[i], ha="center", va="center")
 
 
+def plot_solution_depth4(solution, solution_id, sums=None, weights=None):
+    centers, _ = hx.create_hex_grid(n=100, do_plot=False, crop_circ=4, rotate_deg=90)
+    centers_x = centers[:, 0]
+    centers_y = centers[:, 1]
+
+    colours = solution[PLOT_MAP_DEPTH_4]
+    weight_colours = ['k' if i == YELLOW else 'w' for i in colours]
+    colours = [YELLOW_ARRAY if i == YELLOW else BLACK_ARRAY for i in colours]
+    edges = [STROKE_ARRAY for i in colours]
+
+    hx.plot_single_lattice_custom_colors(centers_x, centers_y, face_color=colours,
+                                         edge_color=edges,
+                                         min_diam=0.9,
+                                         plotting_gap=0.05,
+                                         rotate_deg=90)
+
+    ax = plt.gca()
+    ax.axis('off')
+    ax.set_title(f"{solution_id}")
+
+    if weights is not None:
+        weights = np.array(weights)[PLOT_MAP_DEPTH_4]
+
+        for i in range(len(weights)):
+           plt.text(centers_x[i], centers_y[i], weights[i], ha="center", va="center", c=weight_colours[i])
+
+    # if sums is None:
+    #     ax.set_xlim([-3.1, 3.1])
+    #     ax.set_ylim([-3.5, 3.5])
+    # else:
+    #     ax.set_xlim([-3.3, 3.3])
+    #     ax.set_ylim([-3.8, 3.8])
+    #     for i in range(len(SUM_POSITIONS_DEPTH_2)):
+    #         plt.text(SUM_POSITIONS_DEPTH_2[i][0], SUM_POSITIONS_DEPTH_2[i][1], sums[i], ha="center", va="center")
+
+
 
 def plot_solution(soln, soln_id, sums=None, weights=None):
     if len(soln) == NUM_TILES_DEPTH_2:
@@ -117,8 +153,7 @@ def plot_solution(soln, soln_id, sums=None, weights=None):
     elif len(soln) == NUM_TILES_DEPTH_3:
         plot_solution_depth3(soln, soln_id, sums=sums, weights=weights)
     else:
-        pass
-        #plot_solution_depth4(soln, soln_id, sums=sums, weights=weights)
+        plot_solution_depth4(soln, soln_id, sums=sums, weights=weights)
 
 
 

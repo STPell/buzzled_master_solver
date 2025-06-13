@@ -58,7 +58,8 @@ all the different solutions.
 - ~~Automate plotting solutions as they're generated~~
 - Generalise to different sizes of puzzles
 - Figure out a way of analytically predicting how many solutions there are
-- Build a tool to solve the mini, classic, and expert puzzles.
+- ~~Build a tool to solve the mini, classix, and expert puzzles~~.
+- Build a clone to add a depth 5 puzzle
 
 
 ## Auto Solve - Extra installton steps
