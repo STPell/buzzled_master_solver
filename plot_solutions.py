@@ -2,17 +2,32 @@ import numpy as np
 import hexalattice.hexalattice as hx
 import matplotlib.pyplot as plt
 
-PLOT_MAP = [7, 14, 21, 28, 4, 11, 18, 25, 32, 2, 8, 15, 22, 29, 35, 1, 5, 12, 19, 26, 33, 37, 3, 9, 16, 23, 30, 36, 6, 13, 20, 27, 34, 10, 17, 24, 31]
+PLOT_MAP_DEPTH_3 = [7, 14, 21, 28, 4, 11, 18, 25, 32, 2, 8, 15, 22, 29, 35, 1, 5, 12, 19, 26, 33, 37, 3, 9, 16, 23, 30, 36, 6, 13, 20, 27, 34, 10, 17, 24, 31]
+PLOT_MAP_DEPTH_2 = [4, 9, 14, 2, 7, 12, 17, 1, 5, 10, 15, 19, 3, 8, 13, 18, 6, 11, 16]
+PLOT_MAP_DEPTH_4 = [11,20,29,38,47,7,16,25,34,43,52,4,12,21,30,39,48,56,2,8,17,26,35,44,53,59,1,5,13,22,31,40,49,57,61,3,9,18,27,36,45,54,60,6,14,23,32,41,50,58,10,19,28,37,46,55,15,24,33,42,51]
 
 # Convert from numbering to python indexing
-PLOT_MAP = [i - 1 for i in PLOT_MAP]
+PLOT_MAP_DEPTH_3 = [i - 1 for i in PLOT_MAP_DEPTH_3]
+PLOT_MAP_DEPTH_2 = [i - 1 for i in PLOT_MAP_DEPTH_2]
+PLOT_MAP_DEPTH_4 = [i - 1 for i in PLOT_MAP_DEPTH_4]
 
-SUM_POSITIONS = [(-0.1, 3.5), (0.83, 3.0), (1.75, 2.5), (2.58, 2.0),
-                 (3.1, 1.0), (3.1, 0.0), (3.1, -1.0), (3.1, -2.0),
-                 (2.3, -2.4), (1.4, -2.9), (0.6, -3.4),
-                 (-0.7, -3.4), (-1.5, -2.9), (-2.4, -2.4), (-3.2, -2.0),
-                 (-3.2, -1.0), (-3.2, 0.0), (-3.2, 1.0),
-                 (-2.7, 2.0), (-1.85, 2.5), (-0.9, 3.0)]
+NUM_TILES_DEPTH_3 = 37
+NUM_TILES_DEPTH_2 = 19
+NUM_TILES_DEPTH_4 = 61
+
+SUM_POSITIONS_DEPTH_3 = [(-0.1, 3.5), (0.83, 3.0), (1.75, 2.5), (2.58, 2.0),
+                         (3.1, 1.0), (3.1, 0.0), (3.1, -1.0), (3.1, -2.0),
+                         (2.3, -2.4), (1.4, -2.9), (0.6, -3.4),
+                         (-0.7, -3.4), (-1.5, -2.9), (-2.4, -2.4), (-3.2, -2.0),
+                         (-3.2, -1.0), (-3.2, 0.0), (-3.2, 1.0),
+                         (-2.7, 2.0), (-1.85, 2.5), (-0.9, 3.0)]
+
+SUM_POSITIONS_DEPTH_2 = [(0, 2.6), (0.87, 2.1), (1.72, 1.6),
+                         (2.33, 0.73), (2.33,-0.25), (2.33, -1.28),
+                         (1.38, -1.77),(0.54, -2.23),
+                         (-0.61, -2.3), (-1.44, -1.79), (-2.4, -1.27),
+                         (-2.43, -0.29), (-2.43, 0.73),
+                         (-1.72, 1.6), (-0.87, 2.1)]
 
 YELLOW_HEX = "FFD700"
 BLACK_HEX = "333333"
@@ -23,12 +38,12 @@ STROKE_ARRAY = [0xAA/255,0xAA/255,0xAA/255]
 YELLOW = 'Y'
 BLACK = 'B'
 
-def plot_solution(solution, solution_id, sums=None, weights=None):
+def plot_solution_depth3(solution, solution_id, sums=None, weights=None):
     centers, _ = hx.create_hex_grid(n=50, do_plot=False, crop_circ=3, rotate_deg=90)
     centers_x = centers[:, 0]
     centers_y = centers[:, 1]
 
-    colours = solution[PLOT_MAP]
+    colours = solution[PLOT_MAP_DEPTH_3]
     weight_colours = ['k' if i == YELLOW else 'w' for i in colours]
     colours = [YELLOW_ARRAY if i == YELLOW else BLACK_ARRAY for i in colours]
     edges = [STROKE_ARRAY for i in colours]
@@ -44,7 +59,7 @@ def plot_solution(solution, solution_id, sums=None, weights=None):
     ax.set_title(f"{solution_id}")
 
     if weights is not None:
-        weights = np.array(weights)[PLOT_MAP]
+        weights = np.array(weights)[PLOT_MAP_DEPTH_3]
 
         for i in range(len(weights)):
             plt.text(centers_x[i], centers_y[i], weights[i], ha="center", va="center", c=weight_colours[i])
@@ -56,8 +71,54 @@ def plot_solution(solution, solution_id, sums=None, weights=None):
         ax.set_xlim([-3.3, 3.3])
         ax.set_ylim([-3.8, 3.8])
         for i in range(len(sums)):
-            plt.text(SUM_POSITIONS[i][0], SUM_POSITIONS[i][1], sums[i])
+            plt.text(SUM_POSITIONS_DEPTH_3[i][0], SUM_POSITIONS_DEPTH_3[i][1], sums[i])
 
+
+def plot_solution_depth2(solution, solution_id, sums=None, weights=None):
+    centers, _ = hx.create_hex_grid(n=50, do_plot=False, crop_circ=2, rotate_deg=90)
+    centers_x = centers[:, 0]
+    centers_y = centers[:, 1]
+
+    colours = solution[PLOT_MAP_DEPTH_2]
+    weight_colours = ['k' if i == YELLOW else 'w' for i in colours]
+    colours = [YELLOW_ARRAY if i == YELLOW else BLACK_ARRAY for i in colours]
+    edges = [STROKE_ARRAY for i in colours]
+
+    hx.plot_single_lattice_custom_colors(centers_x, centers_y, face_color=colours,
+                                         edge_color=edges,
+                                         min_diam=0.9,
+                                         plotting_gap=0.05,
+                                         rotate_deg=90)
+
+    ax = plt.gca()
+    ax.axis('off')
+    ax.set_title(f"{solution_id}")
+
+    if weights is not None:
+        weights = np.array(weights)[PLOT_MAP_DEPTH_2]
+
+        for i in range(len(weights)):
+            plt.text(centers_x[i], centers_y[i], weights[i], ha="center", va="center", c=weight_colours[i])
+
+    if sums is None:
+        ax.set_xlim([-3.1, 3.1])
+        ax.set_ylim([-3.5, 3.5])
+    else:
+        ax.set_xlim([-3.3, 3.3])
+        ax.set_ylim([-3.8, 3.8])
+        for i in range(len(SUM_POSITIONS_DEPTH_2)):
+            plt.text(SUM_POSITIONS_DEPTH_2[i][0], SUM_POSITIONS_DEPTH_2[i][1], sums[i], ha="center", va="center")
+
+
+
+def plot_solution(soln, soln_id, sums=None, weights=None):
+    if len(soln) == NUM_TILES_DEPTH_2:
+        plot_solution_depth2(soln, soln_id, sums=sums, weights=weights)
+    elif len(soln) == NUM_TILES_DEPTH_3:
+        plot_solution_depth3(soln, soln_id, sums=sums, weights=weights)
+    else:
+        pass
+        #plot_solution_depth4(soln, soln_id, sums=sums, weights=weights)
 
 
 

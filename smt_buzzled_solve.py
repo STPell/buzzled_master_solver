@@ -120,8 +120,12 @@ def test_mini():
     print(solution_mini_65)
     print(s == solution_mini_65)
 
-    #plotter.plot_solutions([s], sums=sums_classic_59, weights=weights_classic_59)
+    plotter.plot_solutions([s], sums=sums_mini_65, weights=weights_mini_65)
 
+
+def test_expert():
+    weights_expert_65 = [3,3,1,3,4,4,5,3,2,5,3,5,1,4,4,4,4,2,1,4,3,3,2,5,1,2,3,1,2,3,1,2,4,5,2,5,1,2,2,4,1,1,3,3,1,2,1,4,1,4,1,4,2,1,3,4,2,3,3,1,4,3,5]
+    sums_expert_65 = []
 
 
 if __name__ == "__main__":
